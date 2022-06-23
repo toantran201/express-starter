@@ -10,27 +10,6 @@ app.use(morgan('dev'))
 app.use(cors())
 app.use(express.static('dist'))
 
-let notes = [
-    {
-        id: 1,
-        content: "HTML is easy",
-        date: "2022-05-30T17:30:31.098Z",
-        important: true
-    },
-    {
-        id: 2,
-        content: "Browser can execute only Javascript",
-        date: "2022-05-30T18:39:34.091Z",
-        important: false
-    },
-    {
-        id: 3,
-        content: "GET and POST are the most important methods of HTTP protocol",
-        date: "2022-05-30T19:20:14.298Z",
-        important: true
-    }
-]
-
 app.get('/', (req, res) => {
     res.send(`<h1>Welcome to hello-world app</h1>`)
 })
@@ -56,50 +35,61 @@ app.get('/api/notes/:id', (req, res, next) => {
         .catch(error => next(error))
 })
 
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
     const body = req.body
-
-    if (!body.content) {
-        return res.status(400).json({
-            error: 'Content missing'
-        })
-    }
-
     const note = new Note({
         content: body.content,
         important: body.important || false,
         date: new Date(),
     })
 
-    note.save().then(savedNote => {
-        res.json(savedNote)
-    })
+    note.save()
+        .then(savedNote => {
+            res.json(savedNote)
+        })
+        .catch(error => next(error))
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    notes = notes.filter(note => note.id !== id)
+app.put('/api/notes/:id', (req, res, next) => {
+    const {content, important} = req.body
 
-    res.status(204).end()
+
+    Note.findByIdAndUpdate(
+        req.params.id,
+            {content, important},
+            {new: true, runValidators: true, context: 'query'}
+        )
+        .then(updatedNote => {
+            res.json(updatedNote)
+        })
+        .catch(error => next(error))
 })
 
-const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: 'unknown endpoint' })
-}
+app.delete('/api/notes/:id', (req, res, next) => {
+    Note.findByIdAndRemove(req.params.id)
+        .then(result => {
+            console.log(result)
+            res.status(204).end()
+        })
+        .catch(err => next(err))
+})
 
 // handler of requests with unknown endpoint
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({error: 'unknown endpoint'})
+}
 app.use(unknownEndpoint)
 
-// Error handler middleware
+// Error handler middleware - should be the last loaded middleware
 const errorHandler = (error, req, res, next) => {
-    console.error(error.message)
-    if(error.name === 'CastError') {
-        return res.status(400).send({errorMsg: 'malformed id'})
+    console.error(error)
+
+    switch (error.name){
+        case 'CastError': return res.status(400).send({error: 'malformatted id'})
+        case 'ValidationError': return res.status(400).json({error: error.message})
     }
     next(error)
 }
-
-//should be the last loaded middleware
 app.use(errorHandler)
 
 const PORT = process.env.PORT
