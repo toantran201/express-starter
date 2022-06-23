@@ -45,33 +45,38 @@ app.get('/api/notes', (req, res) => {
 })
 
 app.get('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const note = notes.find(item => item.id === id)
-    if(note){
-        res.json(note)
-    }
-    else {
-        res.status(404).end()
-    }
+    Note.findById(req.params.id)
+        .then(note => {
+            if (note) {
+                res.json(note)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(400).send({error: 'Malformed Id'})
+        })
 })
 
 app.post('/api/notes', (req, res) => {
     const body = req.body
 
-    if(!body.content){
+    if (!body.content) {
         return res.status(400).json({
             error: 'Content missing'
         })
     }
 
-    const note = {
+    const note = new Note({
         content: body.content,
         important: body.important || false,
         date: new Date(),
-        id: notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 0
-    }
-    notes = notes.concat(note)
-    res.json(req.body)
+    })
+
+    note.save().then(savedNote => {
+        res.json(savedNote)
+    })
 })
 
 app.delete('/api/notes/:id', (req, res) => {
