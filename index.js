@@ -44,7 +44,7 @@ app.get('/api/notes', (req, res) => {
     })
 })
 
-app.get('/api/notes/:id', (req, res) => {
+app.get('/api/notes/:id', (req, res, next) => {
     Note.findById(req.params.id)
         .then(note => {
             if (note) {
@@ -53,10 +53,7 @@ app.get('/api/notes/:id', (req, res) => {
                 res.status(404).end()
             }
         })
-        .catch(error => {
-            console.log(error)
-            res.status(400).send({error: 'Malformed Id'})
-        })
+        .catch(error => next(error))
 })
 
 app.post('/api/notes', (req, res) => {
@@ -86,6 +83,24 @@ app.delete('/api/notes/:id', (req, res) => {
     res.status(204).end()
 })
 
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' })
+}
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint)
+
+// Error handler middleware
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message)
+    if(error.name === 'CastError') {
+        return res.status(400).send({errorMsg: 'malformed id'})
+    }
+    next(error)
+}
+
+//should be the last loaded middleware
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
