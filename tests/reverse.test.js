@@ -7,7 +7,6 @@ test('Reverse of a', () => {
 
 test('reverse of react', () => {
     const result = reverse('react')
-
     expect(result).toBe('tcaer')
 })
 
