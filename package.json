@@ -4,9 +4,9 @@
   "description": "Hello world nodejs application",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "lint": "eslint ."
   },
   "author": "toantran201",
@@ -19,7 +19,12 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^8.18.0",
+    "jest": "^28.1.1",
     "nodemon": "^2.0.16"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
