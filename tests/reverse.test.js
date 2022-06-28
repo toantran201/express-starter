@@ -13,6 +13,5 @@ test('reverse of react', () => {
 
 test('reverse of releveler', () => {
     const result = reverse('releveler')
-
     expect(result).toBe('releveler')
 })
