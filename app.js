@@ -5,6 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 // Controller
 const notesRouter = require('./controllers/notes')
+const usersRouter = require('./controllers/users')
 // Utils
 const middleware = require('./utils/middleware')
 const config = require('./utils/config')
@@ -29,6 +30,7 @@ app.use(middleware.requestLogger)
 
 // Api
 app.use('/api/notes', notesRouter)
+app.use('/api/users', usersRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)

@@ -19,3 +19,10 @@ Eliminating the try-catch in Error handling with async-await, we can use lib
 ```
 express-async-errors
 ```
+
+## User administration
+### Notes
+To encrypt password, we can use lib
+```
+bcrypt
+```
