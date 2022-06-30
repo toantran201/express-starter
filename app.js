@@ -4,6 +4,7 @@ const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 // Controller
+const loginRouter = require('./controllers/login')
 const notesRouter = require('./controllers/notes')
 const usersRouter = require('./controllers/users')
 // Utils
@@ -29,6 +30,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 
 // Api
+app.use('/api/login', loginRouter)
 app.use('/api/notes', notesRouter)
 app.use('/api/users', usersRouter)
 
